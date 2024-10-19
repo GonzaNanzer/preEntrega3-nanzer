@@ -15,7 +15,7 @@ class Producto{
 
     //Sirve para modificar manualmente el stock de un producto:
     modificarStockManual(nuevoStock){
-        this.stock =parseInt(nuevoStock) ;
+        this.stock = parseInt(nuevoStock) ;
     }
 
     //Reduce la cantidad disponible de un producto por venta:
@@ -31,7 +31,7 @@ class Producto{
 
 class Pedido{
     constructor(nombreCliente, listado){
-        this.nombreCliente = nombreCliente;
+        this.nombreCliente = nombreCliente ? nombreCliente : 'generico';
         this.productosPedidos = [];
         listado.forEach((item) => this.productosPedidos.push(item));
     }
@@ -63,7 +63,7 @@ class Pedido{
 }
 
 //Variables sobre productos:
-const listadoProductos = [new Producto("tenedor",150,30), new Producto("Cuchara",180,27), new Producto("Plato",200,15)]; //Almacena instancias de la clase Producto. Inicia con tenedor y cuchara.
+let listadoProductos = [new Producto("tenedor",150,30), new Producto("Cuchara",180,27), new Producto("Plato",200,15)]; //Almacena instancias de la clase Producto. Inicia con tenedor y cuchara.
 let listadoProductosJSON = JSON.stringify(listadoProductos); //Convertir el listado de productos iniciales en string
 localStorage.setItem("listadoProductosGuardada",listadoProductosJSON); //Guardo el string en local
 
@@ -75,9 +75,14 @@ localStorage.setItem("listadoPedidosGuardado",listadoPedidosJSON); //Guardo el s
 
 //Funciones:
     //  1 - Generar las opciones en los dropdowns:
-let listaDrop = document.querySelector('.dropDownProductos');
+let listaDrop = document.querySelector('.dropDownProductos');  //en la interfaz pedidos
 generarOpciones(listaDrop);
-function generarOpciones(prod) {
+
+function generarOpciones(listaDrop) {
+    //vaciar las opciones actuales:
+    let actuales = listaDrop.querySelectorAll("option");
+    actuales.forEach(elem => elem.remove());
+
     //recuperar desde local el listado de objetos:
     let productosGuardados = localStorage.getItem("listadoProductosGuardada"); //recupero el string
     let listaProdObj = JSON.parse(productosGuardados); //los transformo en objetos
@@ -86,10 +91,11 @@ function generarOpciones(prod) {
         const option = document.createElement('option');
         option.value = Number(producto.precio); //asigno el precio al value de la opción seleccionada, para usarlo en calcularTotalRenglon
         option.text = `${producto.nombre}`;
-        prod.appendChild(option);
+        listaDrop.appendChild(option);
     });
 }
-listaDrop = document.querySelector('.dropDownModificar');
+
+listaDrop = document.querySelector('.dropDownModificar'); //en la interfaz modificar
 generarOpciones(listaDrop);
 
 
@@ -117,7 +123,7 @@ function agregarLinea(){
     })
 
     //evento change en el input para la cantidad
-    clon.querySelector(".cantidadInput").addEventListener("change", calcularTotalRenglon)
+    clon.querySelector(".cantidadInput").addEventListener("change", calcularTotalRenglon);
 
     //evento change en el dropdown de productos
     clon.querySelector(".dropDownProductos").addEventListener("change", calcularTotalRenglon);
@@ -132,6 +138,7 @@ function calcularTotalRenglon(event){
     let cantidadSeleccionada = Number(event.target.closest(".lineaProductos").querySelector(".cantidadInput").value);
     event.target.closest(".lineaProductos").querySelector(".totalInput").value = precioItemSeleccionado * cantidadSeleccionada;
     calcularTotal();
+    return;
 }
 
     // 5 - calcular el total del pedido y mostrarlo en el span del footer de card pedido
@@ -143,6 +150,7 @@ function calcularTotal(){
         total += totalItem;
     })
     document.getElementById("totalPedido").innerText = total;
+    return;
 }
 
     // 6 - Guardar el pedido con el nombre del cliente y refrescar el sector de nuevo pedido
@@ -152,8 +160,10 @@ function confirmarVenta(){
     //obtengo el nombre del cliente:
     let nombre = document.querySelector(".nombreCliente").value;
     //armo un array con el listado de productos del pedido:
-    let items = Array.from(document.querySelectorAll(".dropDownProductos"))
-    let productos = items.map((item) => item.options[item.selectedIndex].text);
+    let items = Array.from(document.querySelectorAll(".dropDownProductos")) //array con todos los dropdowns, es decir con todos objetos dropdown
+    //console.log(items);
+    let productos = items.map((item) => item.options[item.selectedIndex].text); //array sólo con los nombres del producto seleccionado en cada dropdown
+    //console.log(productos);
     //Ahora puedo instanciar un pedido:
     let nuevoPedido = new Pedido(nombre,productos);
     //guardar el nuevo pedido agregandolo al local storage.
@@ -188,32 +198,53 @@ function agregarLineaModifica(){
         let contenedor = event.target.closest('.lineaProductosModifica');
         contenedor.remove();
     })
-    
     document.getElementById('moficaProductoForm').appendChild(clon);
-
 }
 
 // 9 - Confirmar la modificación, guardar los nuevos datos y volver a la interfaz pedidos
     let botonConfirmaModifica = document.querySelector(".btnConfModifica").addEventListener("click",()=>{
-    //Capturar los nombres para modificar el producto
-    let items = Array.from(document.querySelectorAll(".dropDownModificar"))
-    let productos = items.map((item) => item.options[item.selectedIndex].text); //ya tengo un array con los nombres de los productos a modificar
-    //capturar los precios
-    let precios = Array.from(document.querySelectorAll(".precioModificar"))
-    let nuevosPrecios = precios.map((item) => item.value); //ya tengo un array con los precios de los productos a modificar
-    //capturar los stocks
-    let stocks = Array.from(document.querySelectorAll(".cantidadModificar"))
-    let nuevosStocks = stocks.map((item) => item.value); //ya tengo un array con los stocks de los productos a modificar
 
-    console.log(productos);
-    console.log(nuevosPrecios);
-    console.log(nuevosStocks);
-    //Capturar los datos almacenados en localStorage:
+    //Capturar los nombres para modificar el producto
+        let items = Array.from(document.querySelectorAll(".dropDownModificar")) //array con todos los objetos dropdown
+        let productosAmodificar = items.map((item) => item.options[item.selectedIndex].text); //array con los nombres de los productos a modificar
+    //capturar los precios
+        let precios = Array.from(document.querySelectorAll(".precioModificar")) //array con todos los objetos input de precios
+        let nuevosPrecios = precios.map((item) => item.value); //array con los precios de los productos a modificar
+    //capturar los stocks
+        let stocks = Array.from(document.querySelectorAll(".cantidadModificar")) //array con los objetos input de los stocks
+        let nuevosStocks = stocks.map((item) => item.value); //array con los stocks de los productos a modificar
+
+    //Capturar los productos guardados en localStorage: traerlos como json y parsearlos.
+        listadoGuardado = JSON.parse(localStorage.getItem('listadoProductosGuardada')); //listado productos contiene un array de objetos con los productos guardados pero sin acceso a metodos
+        
+        let instanciador = listadoGuardado.map((obj) => new Producto(obj.nombre, obj.precio, obj.stock));
+        listadoProductos = instanciador;
+        console.log(listadoProductos);
 
     //Usar los metodos de la clase producto para modificar los datos:
-    //listadoProductos.find((elem) => elem.nombre === nombreProducto).modificarStockManual(nuevoStock);
-    //listadoProductos.find((elem) => elem.nombre === nombreProducto).modificarPecio(nuevoStock);
+    //del precio:
+        productosAmodificar.forEach((prod)=>{
+            let existe = listadoProductos.find((obj) => obj.nombre === prod);
+            console.log(existe);
+            if(existe){
+                existe.modificarPecio(nuevosPrecios[productosAmodificar.indexOf(prod)]);
+            }
+        }); 
+    //del stock:
+        productosAmodificar.forEach((prod)=>{
+            let existe = listadoProductos.find((obj) => obj.nombre === prod);
+            if(existe){
+                existe.modificarStockManual(nuevosStocks[productosAmodificar.indexOf(prod)]);
+            }  
+        });
+    //Volver a guardar todo en local:
+        localStorage.setItem('listadoProductosGuardada',JSON.stringify(listadoProductos));
     //volver:
-    document.getElementById("interfazModificar").classList.add("d-none");
-    document.getElementById("interfazPedidos").classList.remove("d-none");
-})
+        let listaDrop = document.querySelector('.dropDownProductos');  
+        generarOpciones(listaDrop); //referescar las opciones que tienen los dropdowns
+        document.getElementById("interfazModificar").classList.add("d-none");
+        document.getElementById("interfazPedidos").classList.remove("d-none");
+    
+});
+
+// 10 - Agregar productos
