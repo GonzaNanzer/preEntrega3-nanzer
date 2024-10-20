@@ -177,9 +177,12 @@ function confirmarVenta(){
 } 
 
 // 7 - Ir a la interfaz modificar y generar opciones en el dropdown
-let botonModificar = document.querySelector(".btnModifica").addEventListener("click", ()=>{
-    document.getElementById("interfazPedidos").classList.add("d-none");
-    document.getElementById("interfazModificar").classList.remove("d-none");
+    let botonModificar = document.querySelector(".btnModifica").addEventListener("click", ()=>{
+        let listaDrop = document.querySelector('.dropDownModificar');  
+        generarOpciones(listaDrop); //referescar las opciones que tienen los dropdowns
+        document.getElementById("interfazModificar").classList.remove("d-none");
+        document.getElementById("interfazPedidos").classList.add("d-none");
+        document.getElementById("interfazAgregar").classList.add("d-none");
 })
 
 // 8 - Agregar linea para modificar mas productos
@@ -242,9 +245,70 @@ function agregarLineaModifica(){
     //volver:
         let listaDrop = document.querySelector('.dropDownProductos');  
         generarOpciones(listaDrop); //referescar las opciones que tienen los dropdowns
-        document.getElementById("interfazModificar").classList.add("d-none");
         document.getElementById("interfazPedidos").classList.remove("d-none");
+        document.getElementById("interfazModificar").classList.add("d-none");
+        document.getElementById("interfazAgregar").classList.add("d-none");
+
     
 });
 
 // 10 - Agregar productos
+    //event listeners para los botones de esta interfaz
+document.querySelector(".btnAgregarProductos").addEventListener("click",agregarProductos);
+document.getElementById("agregarOtro").addEventListener("click",agregarLineaAgrega);
+document.querySelector(".btnConfAgregar").addEventListener("click", confirmarAgregar);
+
+    //mostrar la interfaz agregar:
+function agregarProductos(){
+    document.getElementById("interfazAgregar").classList.remove("d-none");
+    document.getElementById("interfazModificar").classList.add("d-none");
+    document.getElementById("interfazPedidos").classList.add("d-none");
+}
+
+    //Agregar linea: 
+function agregarLineaAgrega(){
+    let plantilla = document.querySelector('.plantillaNuevoRenglonAgrega');
+    let contenido = plantilla.content; //esto es un document fragment
+    let clon = contenido.cloneNode(true); 
+
+    //darle funcion al boton eliminar
+    clon.querySelector(".eliminarProductoAgrega").addEventListener("click", (event)=>{
+        let contenedor = event.target.closest('.lineaProductosAgrega');
+        contenedor.remove();
+    })
+    document.getElementById('agregaProductoForm').appendChild(clon);
+}
+
+    //Confirmar agregar y volver:
+function confirmarAgregar(){
+//Capturar un array con todos los nombres de los prodcutos a agregar.
+    let nombres = Array.from(document.querySelectorAll(".nombreAgregar")) //array con todos los objetos input de nombres
+    let nuevosNombres = nombres.map((item) => item.value); //array con los nombres de los productos a agregar
+//Capturar un array con todos las nuevas cantidades.
+    let stocks = Array.from(document.querySelectorAll(".cantidadAgregar")) //array con todos los objetos input de cantidad
+    let nuevosStocks = stocks.map((item) => Number(item.value)); //array con las cantidades a agregar
+//Capturar un array con todos los nuevos stocks.
+    let precios = Array.from(document.querySelectorAll(".precioAgregar")) //array con todos los objetos input de precios
+    let nuevosPrecios = precios.map((item) => Number(item.value)); //array con los precios a agregar
+
+    console.log(nuevosNombres);
+    console.log(nuevosPrecios);
+    console.log(nuevosStocks);
+//Instanciar todos los nuevos productos usando el constructor de la clase e ir guardandolos en un array. (Podría confirmar que no haya ya uno con ese nombre antes de instanciarlo.)
+    let paraAgregar = [];
+    nuevosNombres.forEach((nombre) => {
+        paraAgregar.push(new Producto(nombre,nuevosPrecios[nuevosNombres.indexOf(nombre)],nuevosStocks[nuevosNombres.indexOf(nombre)]));
+    })
+    console.log(paraAgregar);
+//recuperar el json guardado, parsearlo para transformarlo en un array, concatenar el array a agregar, stringifear todo y guardarlo en local. 
+    let stringAgregar = JSON.stringify(JSON.parse(localStorage.getItem("listadoProductosGuardada")).concat(paraAgregar));
+    console.log(stringAgregar);
+    localStorage.setItem("listadoProductosGuardada",stringAgregar);
+
+//Volver a la interfaz nuevo pedido.
+    document.getElementById("interfazPedidos").classList.remove("d-none");
+    document.getElementById("interfazAgregar").classList.add("d-none");
+    document.getElementById("interfazModificar").classList.add("d-none");
+    let listaDrop = document.querySelector('.dropDownProductos');  
+    generarOpciones(listaDrop); //referescar las opciones que tienen los dropdowns
+}
