@@ -1,23 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Gestor de pedidos y stock</title>
 <!-- Bootstrap-->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<!-- Librería Intro.js CSS -->
+<link href="https://unpkg.com/intro.js/introjs.css" rel="stylesheet">
 </head>
 <body>
     <div class="container-fluid full-height d-flex flex-column"> <!-- Contenedor general -->
-        <div class="row flex-grow-1 align-items-stretch "> <!-- Fila Contenedor general -->
-            <div class="col-md-8 d-flex flex-column bg-danger" id="interfazPedidos"> <!-- Columna izquierda: Interface nuevo pedido. 8 espacios -->
+        <div class="row flex-grow-1 align-items-stretch contGral"> <!-- Fila Contenedor general -->
+            <div class="col-md-8 d-flex flex-column bg-danger interfaz" id="interfazPedidos"> <!-- Columna izquierda: Interface nuevo pedido. 8 espacios -->
                 <div class="card mb-3 flex-grow-1 d-flex flex-column mt-2"> <!-- Card pedido -->
                     <div class="card-header d-flex justify-content-between align-items-center"> <!-- card header -->
                         <span class="fw-bold">Nuevo Pedido de: </span> 
-                        <input type="text" class="form-control nombreCliente m-1 text-start w-50" placeholder="Nombre cliente" >
+                        <input type="text" class="form-control nombreCliente m-1 text-start w-50" placeholder="Nombre Cliente">
                         <button class="btn btn-success botonConfirmarVenta fw-bold">Confirmar venta</button> <!-- boton confirmar compra -->
                     </div>
-                    <div class="card-body flex-grow-1 d-flex"> <!-- card body -->
+                    <div class="card-body flex-grow-1 d-flex" > <!-- card body -->
                         <div class="container mt-4 formPedido"> <!-- contenedor form pedido -->
                             <form id="pedidoForm">                            
                                 <div class="row mb-0 text-center" > <!-- Encabezados de las columnas -->
@@ -28,20 +30,20 @@
                                         <label for="cantidadInput" class="form-label fw-bold">Cantidad</label>
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="totalInput" class="form-label fw-bold">Total</label>
+                                        <label for="totalInput" class="form-label fw-bold">Precio en Pesos</label>
                                     </div>
                                 </div>
                                 <div class="row m-1 lineaProductos align-items-center"> <!-- Contenedor renglon de productos en el pedido-->
                                     <div class="col-md-4"> <!-- columna producto, 4 espacios -->
-                                        <select class="form-select dropDownProductos m-1">
-                                            <option selected value="0">Selecciona</option>
+                                        <select class="form-select dropDownProductos m-1" >
+                                            <option selected value="0" >Selecciona</option>
                                         </select>
                                     </div>
                                     <div class="col-md-3"> <!-- columna producto, 3 espacios -->
-                                        <input type="number" class="form-control cantidadInput m-1 text-center" placeholder="0" min="1" step="1">
+                                        <input type="number" class="form-control cantidadInput m-1 text-center" >
                                     </div>
                                     <div class="col-md-3"> <!-- columna producto, 3 espacios -->
-                                        <input type="text" class="form-control totalInput m-1 text-center" placeholder="Total" readonly>
+                                        <input type="text" class="form-control totalInput m-1 text-center" placeholder="Total" readonly >
                                     </div>
                                     <template class="plantillaNuevoRenglon">
                                         <div class="row m-1 lineaProductos align-items-center">
@@ -65,18 +67,18 @@
                             </form>
                             <div class="row m-1 lineaProductos"> 
                                 <div class="col-md-12 d-flex justify-content-end">
-                                    <button id="agregarProductoBtn" class="btn btn-primary">Agregar producto</button>
+                                    <button id="agregarProductoBtn" class="btn btn-primary" >Agregar producto</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer d-flex justify-content-end"> <!-- card footer -->
+                    <div class="card-footer d-flex justify-content-end align-items-center"> <!-- card footer -->
                         <span class="fw-bold w-25 text-center">Total del pedido: </span>
-                        <span id="totalPedido" class="w-25 text-center border border-success rounded">  </span>
+                        <span id="totalPedido" class="w-25 text-center border border-success rounded"> Total </span>
                     </div>
                 </div>
             </div>
-            <div class="col-md-8 d-flex flex-column bg-danger d-none" id="interfazModificar"> <!-- Columna izquierda: Interface modificar productos. 8 espacios -->
+            <div class="col-md-8 d-flex flex-column bg-danger d-none interfaz" id="interfazModificar"> <!-- Columna izquierda: Interface modificar productos. 8 espacios -->
                 <div class="card mb-3 flex-grow-1 d-flex flex-column mt-2"> <!-- Card modificar -->
                     <div class="card-header d-flex justify-content-between align-items-center"> <!-- card header -->
                         <span class="fw-bold">Modificar productos</span> 
@@ -140,7 +142,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-8 d-flex flex-column bg-danger d-none" id="interfazAgregar"> <!-- Columna izquierda: Interface agregar productos. 8 espacios -->
+            <div class="col-md-8 d-flex flex-column bg-danger d-none interfaz" id="interfazAgregar"> <!-- Columna izquierda: Interface agregar productos. 8 espacios -->
                 <div class="card mb-3 flex-grow-1 d-flex flex-column mt-2"> <!-- Card modificar -->
                     <div class="card-header d-flex justify-content-between align-items-center"> <!-- card header -->
                         <span class="fw-bold">Agregar productos</span> 
@@ -215,19 +217,27 @@
 
                 <!-- Botones de la derecha -->
                 <div class="col-12 d-flex flex-column justify-content-center mb-2">
-                    <button class="btn btn-secondary mb-2 w-100 btnAgregarProductos">Agregar Productos</button>
-                    <button class="btn btn-secondary mb-2 w-100 btnModifica">Modificar Productos</button>
-                    <button class="btn btn-secondary w-100">Estadísticas -no implementado aún-</button>
+                    <button class="btn btn-dark mb-2 w-100 btnAgregarProductos">Agregar Productos</button>
+                    <button class="btn btn-dark mb-2 w-100 btnModifica">Modificar Productos</button>
+                    <button class="btn btn-light w-100 btnMoneda">Selecionar Moneda</button>
                 </div>
                 </div>
             </div>
+        </div>
+        <div class="container-fluid full-height d-flex flex-column ">
+            <button id="startTour" class="btn btn-secondary mt-4 fw-bold text-light ">HACER UN TOUR POR ESTA INTERFAZ</button>
         </div>
     </div>
 
 
     
+<!-- Librería Sweet Alert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Bootstrap JS and dependencies (Popper.js and jQuery) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Librería Intro.js -->
+<script src="https://unpkg.com/intro.js/intro.js"></script>
+<!-- main js -->
 <script src="./main.js"></script>
 </body>
 </html>

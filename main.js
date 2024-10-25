@@ -72,8 +72,56 @@ let listadoPedidos = []; //Almacena instancias de la clase Pedido
 let listadoPedidosJSON = JSON.stringify(listadoPedidos); //Convertir el listado de pedidos iniciales en string
 localStorage.setItem("listadoPedidosGuardado",listadoPedidosJSON); //Guardo el string en local
 
+//Otras variables
+let monedaSeleccionada = 'peso';
+let cotizacion;
+cotizacion = obtenerCotizacion();
 
 //Funciones:
+    //  0 - Intro
+const tours = [ //array de objetos
+    { //objeto 1, posición 0: interfaz pedidos
+    steps: [
+        { element: document.querySelector('.nombreCliente'), intro: 'Ingresa el nombre del cliente acá' },
+        { element: document.querySelector('.dropDownProductos'), intro: 'Selecciona el producto en la lista' },
+        { element: document.querySelector('.cantidadInput'), intro: 'Ingresa la cantidad para ese producto' },
+        { element: document.querySelector('.totalInput'), intro: 'El total se calcula automáticamente en pesos argentinos' },
+        { element: document.querySelector('#totalPedido'), intro: 'El total del pedido se muestra acá en la moneda seleccionada' },
+        { element: document.querySelector('#agregarProductoBtn'), intro: 'Agregá filas para sumar productos al pedido' },
+        { element: document.querySelector('.botonConfirmarVenta'), intro: 'Confirmá la venta para terminar' },
+    ]
+    },
+    { //objeto 2, posición 1: interfaz agregar productos
+        steps: [
+            { element: document.querySelector('.nombreAgregar'), intro: 'Ingresa el nombre del producto que desea agregar' },
+            { element: document.querySelector('.cantidadAgregar'), intro: 'Seleccione el stock de ese producto a agregar' },
+            { element: document.querySelector('.precioAgregar'), intro: 'Seleccione el precio de ese producto' },
+            { element: document.querySelector('#agregarOtro'), intro: 'Agregue una nueva linea para agregar otro producto' },
+            { element: document.querySelector('.btnConfAgregar'), intro: 'Confirme los cambios para terminar' },
+        ]
+    },
+    { //objeto 3, posición 1: interfaz modificar productos
+        steps: [
+            { element: document.querySelector('.dropDownModificar'), intro: 'Selecciona el producto que queres modificar' },
+            { element: document.querySelector('.cantidadModificar'), intro: 'Seleccione el nuevo stock para ese producto' },
+            { element: document.querySelector('.precioModificar'), intro: 'Ingresa el nuevo precio de ese producto' },
+            { element: document.querySelector('#modificarOtro'), intro: 'Agregue una nueva linea para modificar otro producto' },
+            { element: document.querySelector('.btnConfModifica'), intro: 'Confirme los cambios para terminar' },
+        ]
+    }
+]
+
+document.getElementById('startTour').addEventListener('click', function() {
+    let indice;
+    let intActual = Array.from(document.querySelectorAll('.interfaz')).find(item => !item.classList.contains('d-none'));
+    if(intActual.id == 'interfazPedidos'){indice = 0;}
+    else if(intActual.id == 'interfazAgregar'){indice = 1;}
+    else { indice = 2;}
+    introJs()
+        .setOptions(tours[indice])
+        .start();
+});  
+
     //  1 - Generar las opciones en los dropdowns:
 let listaDrop = document.querySelector('.dropDownProductos');  //en la interfaz pedidos
 generarOpciones(listaDrop);
@@ -97,7 +145,6 @@ function generarOpciones(listaDrop) {
 
 listaDrop = document.querySelector('.dropDownModificar'); //en la interfaz modificar
 generarOpciones(listaDrop);
-
 
     //  2 - Asignar eventos a la primera linea de pedidos.
 let primeraCantidad = document.querySelector(".cantidadInput").addEventListener("change", calcularTotalRenglon); //selecciona el primero
@@ -136,7 +183,7 @@ function agregarLinea(){
 function calcularTotalRenglon(event){
     let precioItemSeleccionado = Number(event.target.closest(".lineaProductos").querySelector(".dropDownProductos").value);
     let cantidadSeleccionada = Number(event.target.closest(".lineaProductos").querySelector(".cantidadInput").value);
-    event.target.closest(".lineaProductos").querySelector(".totalInput").value = precioItemSeleccionado * cantidadSeleccionada;
+    event.target.closest(".lineaProductos").querySelector(".totalInput").value = cantidadSeleccionada * precioItemSeleccionado;
     calcularTotal();
     return;
 }
@@ -149,7 +196,8 @@ function calcularTotal(){
         let totalItem = Number(item.value);
         total += totalItem;
     })
-    document.getElementById("totalPedido").innerText = total;
+    if (monedaSeleccionada === 'dolar'){total = total/cotizacion;} //si la moneda seleccionada es dolar, convierto
+    document.getElementById("totalPedido").innerText = total; 
     return;
 }
 
@@ -174,6 +222,11 @@ function confirmarVenta(){
     //borrar los datos del pedido para poder preparar otro
     let renglonesAgregados = document.querySelectorAll(".agregadas");
     renglonesAgregados.forEach((item)=> item.remove());
+    Swal.fire({
+        title: "Éxito!",
+        text: "Pedido guardado correctamente",
+        icon: "success"
+    });
 } 
 
 // 7 - Ir a la interfaz modificar y generar opciones en el dropdown
@@ -245,11 +298,15 @@ function agregarLineaModifica(){
     //volver:
         let listaDrop = document.querySelector('.dropDownProductos');  
         generarOpciones(listaDrop); //referescar las opciones que tienen los dropdowns
+        //probando sweet alert
+        Swal.fire({
+            title: "Éxito!",
+            text: "Los datos se modificaron correctamente",
+            icon: "success"
+        });
         document.getElementById("interfazPedidos").classList.remove("d-none");
         document.getElementById("interfazModificar").classList.add("d-none");
         document.getElementById("interfazAgregar").classList.add("d-none");
-
-    
 });
 
 // 10 - Agregar productos
@@ -257,14 +314,12 @@ function agregarLineaModifica(){
 document.querySelector(".btnAgregarProductos").addEventListener("click",agregarProductos);
 document.getElementById("agregarOtro").addEventListener("click",agregarLineaAgrega);
 document.querySelector(".btnConfAgregar").addEventListener("click", confirmarAgregar);
-
     //mostrar la interfaz agregar:
 function agregarProductos(){
     document.getElementById("interfazAgregar").classList.remove("d-none");
     document.getElementById("interfazModificar").classList.add("d-none");
     document.getElementById("interfazPedidos").classList.add("d-none");
 }
-
     //Agregar linea: 
 function agregarLineaAgrega(){
     let plantilla = document.querySelector('.plantillaNuevoRenglonAgrega');
@@ -278,7 +333,6 @@ function agregarLineaAgrega(){
     })
     document.getElementById('agregaProductoForm').appendChild(clon);
 }
-
     //Confirmar agregar y volver:
 function confirmarAgregar(){
 //Capturar un array con todos los nombres de los prodcutos a agregar.
@@ -306,9 +360,52 @@ function confirmarAgregar(){
     localStorage.setItem("listadoProductosGuardada",stringAgregar);
 
 //Volver a la interfaz nuevo pedido.
+    Swal.fire({
+        title: "Éxito!",
+        text: "Los productos se agregaron correctamente",
+        icon: "success"
+    });
     document.getElementById("interfazPedidos").classList.remove("d-none");
     document.getElementById("interfazAgregar").classList.add("d-none");
     document.getElementById("interfazModificar").classList.add("d-none");
     let listaDrop = document.querySelector('.dropDownProductos');  
     generarOpciones(listaDrop); //referescar las opciones que tienen los dropdowns
 }
+
+// 11 - Seleccionar moneda
+document.querySelector('.btnMoneda').addEventListener("click",()=>{
+    Swal.fire({
+        title: "Seleccione la moneda en la que desea cotizar el pedido",
+        showDenyButton: true,
+        showCancelButton: false,
+        confirmButtonText: "Pesos Argentinos",
+        confirmButtonColor: "#0dcaf0",
+        denyButtonText: `Dólar oficial`,
+        denyButtonColor: "#198754"
+    }).then((result) => {
+        /* Read more about isConfirmed, isDenied below */
+    if (result.isConfirmed) {
+        Swal.fire("Moneda seleccionada", "Los precios se muestran en Pesos Argentinos", "success");
+        monedaSeleccionada = 'peso';
+        document.querySelector('.btnMoneda').innerText = `Moneda seleccionada: ${monedaSeleccionada}`;
+        calcularTotal();
+    } else if (result.isDenied) {
+        Swal.fire("Moneda seleccionada", "Los precios se muestran en Dólares cotización oficial", "success");
+        monedaSeleccionada = 'dolar';
+        document.querySelector('.btnMoneda').innerText = `Moneda seleccionada: ${monedaSeleccionada}`;
+        calcularTotal();
+    }
+    });
+})
+
+// 12 - APIs
+    //Dolar API: Obtener la cotización del dólar oficial y guardarla en una variable cada 1 minuto
+setInterval(obtenerCotizacion, 60000);
+function obtenerCotizacion(){
+    fetch("https://dolarapi.com/v1/dolares/oficial")
+    .then(response => response.json())
+    .then(data => cotizacion = data.venta);
+    //console.log(cotizacion);
+    return cotizacion;
+}
+
