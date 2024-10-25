@@ -79,9 +79,9 @@ cotizacion = obtenerCotizacion();
 
 //Funciones:
     //  0 - Intro
-const tours = [ //array de objetos
-    { //objeto 1, posición 0: interfaz pedidos
-    steps: [
+const tours = [ 
+    { //objeto 1, indice 0: interfaz pedidos. En la option "steps" guardo un array con un objeto por cada paso.
+    steps: [ 
         { element: document.querySelector('.nombreCliente'), intro: 'Ingresa el nombre del cliente acá' },
         { element: document.querySelector('.dropDownProductos'), intro: 'Selecciona el producto en la lista' },
         { element: document.querySelector('.cantidadInput'), intro: 'Ingresa la cantidad para ese producto' },
@@ -91,7 +91,7 @@ const tours = [ //array de objetos
         { element: document.querySelector('.botonConfirmarVenta'), intro: 'Confirmá la venta para terminar' },
     ]
     },
-    { //objeto 2, posición 1: interfaz agregar productos
+    { //objeto 2, indice 1: interfaz agregar productos
         steps: [
             { element: document.querySelector('.nombreAgregar'), intro: 'Ingresa el nombre del producto que desea agregar' },
             { element: document.querySelector('.cantidadAgregar'), intro: 'Seleccione el stock de ese producto a agregar' },
@@ -100,7 +100,7 @@ const tours = [ //array de objetos
             { element: document.querySelector('.btnConfAgregar'), intro: 'Confirme los cambios para terminar' },
         ]
     },
-    { //objeto 3, posición 1: interfaz modificar productos
+    { //objeto 3, indice 1: interfaz modificar productos
         steps: [
             { element: document.querySelector('.dropDownModificar'), intro: 'Selecciona el producto que queres modificar' },
             { element: document.querySelector('.cantidadModificar'), intro: 'Seleccione el nuevo stock para ese producto' },
@@ -110,16 +110,14 @@ const tours = [ //array de objetos
         ]
     }
 ]
-
+    //listener para el boton de iniciar tour
 document.getElementById('startTour').addEventListener('click', function() {
     let indice;
     let intActual = Array.from(document.querySelectorAll('.interfaz')).find(item => !item.classList.contains('d-none'));
     if(intActual.id == 'interfazPedidos'){indice = 0;}
     else if(intActual.id == 'interfazAgregar'){indice = 1;}
     else { indice = 2;}
-    introJs()
-        .setOptions(tours[indice])
-        .start();
+    introJs().setOptions(tours[indice]).start();
 });  
 
     //  1 - Generar las opciones en los dropdowns:
@@ -275,13 +273,13 @@ function agregarLineaModifica(){
         
         let instanciador = listadoGuardado.map((obj) => new Producto(obj.nombre, obj.precio, obj.stock));
         listadoProductos = instanciador;
-        console.log(listadoProductos);
+        //console.log(listadoProductos);
 
     //Usar los metodos de la clase producto para modificar los datos:
     //del precio:
         productosAmodificar.forEach((prod)=>{
             let existe = listadoProductos.find((obj) => obj.nombre === prod);
-            console.log(existe);
+            //console.log(existe);
             if(existe){
                 existe.modificarPecio(nuevosPrecios[productosAmodificar.indexOf(prod)]);
             }
@@ -345,18 +343,18 @@ function confirmarAgregar(){
     let precios = Array.from(document.querySelectorAll(".precioAgregar")) //array con todos los objetos input de precios
     let nuevosPrecios = precios.map((item) => Number(item.value)); //array con los precios a agregar
 
-    console.log(nuevosNombres);
-    console.log(nuevosPrecios);
-    console.log(nuevosStocks);
+    //console.log(nuevosNombres);
+    //console.log(nuevosPrecios);
+    //console.log(nuevosStocks);
 //Instanciar todos los nuevos productos usando el constructor de la clase e ir guardandolos en un array. (Podría confirmar que no haya ya uno con ese nombre antes de instanciarlo.)
     let paraAgregar = [];
     nuevosNombres.forEach((nombre) => {
         paraAgregar.push(new Producto(nombre,nuevosPrecios[nuevosNombres.indexOf(nombre)],nuevosStocks[nuevosNombres.indexOf(nombre)]));
     })
-    console.log(paraAgregar);
+    //console.log(paraAgregar);
 //recuperar el json guardado, parsearlo para transformarlo en un array, concatenar el array a agregar, stringifear todo y guardarlo en local. 
     let stringAgregar = JSON.stringify(JSON.parse(localStorage.getItem("listadoProductosGuardada")).concat(paraAgregar));
-    console.log(stringAgregar);
+    //console.log(stringAgregar);
     localStorage.setItem("listadoProductosGuardada",stringAgregar);
 
 //Volver a la interfaz nuevo pedido.
